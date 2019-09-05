@@ -10,8 +10,7 @@ export const STAGE_HEIGHT = 20;
 /* must wiped in the next stage in the next render)
 */
 
-export const createStage = () => {
+export const createStage = () =>
   Array.from(Array(STAGE_HEIGHT), () =>
     new Array(STAGE_WIDTH).fill([0, "clear"])
   );
-};

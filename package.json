@@ -2,6 +2,7 @@
   "name": "react-tetris",
   "version": "0.1.0",
   "private": true,
+  "author": "Mohamad Omran",
   "dependencies": {
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
@@ -12,6 +13,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mohamadomran/react-tetris.git"
   },
   "eslintConfig": {
     "extends": "react-app"

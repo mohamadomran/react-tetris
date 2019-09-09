@@ -1,5 +1,4 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
 ## React Tetris
 
-Technologies used: React(with hooks), Styled-Components.
+Technologies used: React(with hooks), Styled-Components. A small project done while following this tuotial https://www.youtube.com/watch?v=ZGOaCxX8HIU to get experience the good use of react-hooks.
+

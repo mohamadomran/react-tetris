@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { createStage, checkCollision } from "../gameHelpers";
 
@@ -25,12 +25,29 @@ const Tetris = () => {
   const [gameOver, setGameOver] = useState(false);
   const [paused, setPaused] = useState(false);
   const [savedDropTime, setSavedDropTime] = useState(null);
+  const [highScore, setHighScore] = useState(0);
 
   const [player, updatePlayerPos, resetPlayer, playerRotate, nextPiece] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(
     rowsCleared
   );
+
+  // Load high score from localStorage on mount
+  useEffect(() => {
+    const savedHighScore = localStorage.getItem("tetris-highScore");
+    if (savedHighScore) {
+      setHighScore(parseInt(savedHighScore, 10));
+    }
+  }, []);
+
+  // Update high score when score changes
+  useEffect(() => {
+    if (score > highScore) {
+      setHighScore(score);
+      localStorage.setItem("tetris-highScore", score.toString());
+    }
+  }, [score, highScore]);
 
   console.log("re-render");
 
@@ -136,6 +153,7 @@ const Tetris = () => {
             <div>
               {paused && <Display text="PAUSED" />}
               <Display text={`Score: ${score}`} />
+              <Display text={`High Score: ${highScore}`} />
               <Display text={`Rows: ${rows}`} />
               <Display text={`Level: ${level}`} />
             </div>

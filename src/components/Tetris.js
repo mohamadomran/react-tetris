@@ -117,6 +117,16 @@ const Tetris = () => {
     drop();
   };
 
+  const hardDrop = () => {
+    // Move piece down until it collides
+    let newY = player.pos.y;
+    while (!checkCollision(player, stage, { x: 0, y: newY - player.pos.y + 1 })) {
+      newY++;
+    }
+    // Update position to the landing spot and mark as collided
+    updatePlayerPos({ x: 0, y: newY - player.pos.y, collided: true });
+  };
+
   const move = ({ keyCode }) => {
     // Handle pause key (P or Escape) separately
     if (keyCode === 80 || keyCode === 27) {
@@ -126,10 +136,11 @@ const Tetris = () => {
 
     // Prevent all movements when game is over or paused
     if (!gameOver && !paused) {
-      if (keyCode === 37) movePlayer(-1);
-      else if (keyCode === 39) movePlayer(1);
-      else if (keyCode === 40) dropPlayer();
-      else if (keyCode === 38) playerRotate(stage, 1);
+      if (keyCode === 37) movePlayer(-1); // Left arrow
+      else if (keyCode === 39) movePlayer(1); // Right arrow
+      else if (keyCode === 40) dropPlayer(); // Down arrow (soft drop)
+      else if (keyCode === 38) playerRotate(stage, 1); // Up arrow (rotate)
+      else if (keyCode === 32) hardDrop(); // Spacebar (hard drop)
     }
   };
 

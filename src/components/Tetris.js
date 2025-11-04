@@ -26,8 +26,10 @@ const Tetris = () => {
   const [paused, setPaused] = useState(false);
   const [savedDropTime, setSavedDropTime] = useState(null);
   const [highScore, setHighScore] = useState(0);
+  const [heldPiece, setHeldPiece] = useState(null);
+  const [canHold, setCanHold] = useState(true);
 
-  const [player, updatePlayerPos, resetPlayer, playerRotate, nextPiece] = usePlayer();
+  const [player, updatePlayerPos, resetPlayer, playerRotate, nextPiece, currentPieceObj] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(
     rowsCleared
@@ -63,6 +65,8 @@ const Tetris = () => {
     resetPlayer(true); // true = initial reset, generates both current and next piece
     setGameOver(false);
     setPaused(false);
+    setHeldPiece(null);
+    setCanHold(true);
     setScore(0);
     setRows(0);
     setLevel(0);
@@ -127,6 +131,30 @@ const Tetris = () => {
     updatePlayerPos({ x: 0, y: newY - player.pos.y, collided: true });
   };
 
+  const holdPiece = () => {
+    if (!canHold || gameOver || paused || dropTime === null) return;
+
+    if (heldPiece === null) {
+      // First time holding - store current piece and spawn next piece
+      setHeldPiece(currentPieceObj);
+      resetPlayer(false); // Get next piece as current
+    } else {
+      // Swap current piece with held piece
+      const temp = heldPiece;
+      setHeldPiece(currentPieceObj);
+      resetPlayer(false, temp); // Use held piece as current
+    }
+
+    setCanHold(false); // Can't hold again until next piece
+  };
+
+  // Reset canHold when player collides (new piece spawns)
+  useEffect(() => {
+    if (player.collided) {
+      setCanHold(true);
+    }
+  }, [player.collided]);
+
   const move = ({ keyCode }) => {
     // Handle pause key (P or Escape) separately
     if (keyCode === 80 || keyCode === 27) {
@@ -141,6 +169,7 @@ const Tetris = () => {
       else if (keyCode === 40) dropPlayer(); // Down arrow (soft drop)
       else if (keyCode === 38) playerRotate(stage, 1); // Up arrow (rotate)
       else if (keyCode === 32) hardDrop(); // Spacebar (hard drop)
+      else if (keyCode === 67) holdPiece(); // C key (hold piece)
     }
   };
 
@@ -167,6 +196,12 @@ const Tetris = () => {
               <Display text={`High Score: ${highScore}`} />
               <Display text={`Rows: ${rows}`} />
               <Display text={`Level: ${level}`} />
+            </div>
+          )}
+          {!gameOver && heldPiece && heldPiece.shape && (
+            <div>
+              <Display text="Hold:" />
+              <Preview nextPiece={heldPiece} />
             </div>
           )}
           {!gameOver && nextPiece && nextPiece.shape && (

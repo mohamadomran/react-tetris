@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { createStage } from "../gameHelpers";
+import { createStage, checkCollision } from "../gameHelpers";
 
 export const useStage = (player, resetPlayer) => {
   const [stage, setStage] = useState(createStage());
@@ -22,10 +22,31 @@ export const useStage = (player, resetPlayer) => {
     const updateStage = prevStage => {
       //First flush the stage
       const newStage = prevStage.map(row =>
-        row.map(cell => (cell[1] === "clear" ? [0, "clear"] : cell))
+        row.map(cell => (cell[1] === "clear" || cell[1] === "ghost" ? [0, "clear"] : cell))
       );
 
-      //Then draw the tetromino
+      // Calculate ghost position (where piece will land)
+      let ghostY = player.pos.y;
+      while (!checkCollision(player, newStage, { x: 0, y: ghostY - player.pos.y + 1 })) {
+        ghostY++;
+      }
+
+      //Draw the ghost piece (if different from current position)
+      if (ghostY !== player.pos.y && !player.collided) {
+        player.tetromino.forEach((row, y) => {
+          row.forEach((value, x) => {
+            if (value !== 0) {
+              const ghostYPos = y + ghostY;
+              const xPos = x + player.pos.x;
+              if (ghostYPos >= 0 && ghostYPos < newStage.length && xPos >= 0 && xPos < newStage[0].length) {
+                newStage[ghostYPos][xPos] = [value, "ghost"];
+              }
+            }
+          });
+        });
+      }
+
+      //Then draw the active tetromino
       player.tetromino.forEach((row, y) => {
         row.forEach((value, x) => {
           if (value !== 0) {

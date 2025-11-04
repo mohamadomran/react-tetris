@@ -18,6 +18,7 @@ import { useGameStatus } from "../hooks/useGameStatus";
 import Stage from "./Stage";
 import Display from "./Display";
 import StartButton from "./StartButton";
+import Preview from "./Preview";
 
 const Tetris = () => {
   const [dropTime, setDropTime] = useState(null);
@@ -25,7 +26,7 @@ const Tetris = () => {
   const [paused, setPaused] = useState(false);
   const [savedDropTime, setSavedDropTime] = useState(null);
 
-  const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
+  const [player, updatePlayerPos, resetPlayer, playerRotate, nextPiece] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(
     rowsCleared
@@ -42,7 +43,7 @@ const Tetris = () => {
     //Reset Everything
     setStage(createStage());
     setDropTime(1000);
-    resetPlayer();
+    resetPlayer(true); // true = initial reset, generates both current and next piece
     setGameOver(false);
     setPaused(false);
     setScore(0);
@@ -137,6 +138,12 @@ const Tetris = () => {
               <Display text={`Score: ${score}`} />
               <Display text={`Rows: ${rows}`} />
               <Display text={`Level: ${level}`} />
+            </div>
+          )}
+          {!gameOver && nextPiece && nextPiece.shape && (
+            <div>
+              <Display text="Next:" />
+              <Preview nextPiece={nextPiece} />
             </div>
           )}
           <StartButton callback={startGame} />

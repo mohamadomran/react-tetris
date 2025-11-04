@@ -10,6 +10,8 @@ export const usePlayer = () => {
     collided: false
   });
 
+  const [nextPiece, setNextPiece] = useState(TETROMINOS[0]);
+
   const rotate = (matrix, dir) => {
     //Make rows -> columns (transpose of the matrix)
     const rotatedTetro = matrix.map((_, index) =>
@@ -46,13 +48,23 @@ export const usePlayer = () => {
     }));
   };
 
-  const resetPlayer = useCallback(() => {
-    setPlayer({
-      pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
-      tetromino: randomTetromino().shape,
-      collided: false
-    });
-  }, []);
+  const resetPlayer = useCallback(
+    (isInitialReset = false) => {
+      // On initial reset (game start), generate both current and next piece randomly
+      // On subsequent resets (piece placed), use the next piece as current and generate new next
+      const currentPiece = isInitialReset ? randomTetromino() : nextPiece;
+      const newNextPiece = randomTetromino();
 
-  return [player, updatePlayerPos, resetPlayer, playerRotate];
+      setPlayer({
+        pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
+        tetromino: currentPiece.shape,
+        collided: false
+      });
+
+      setNextPiece(newNextPiece);
+    },
+    [nextPiece]
+  );
+
+  return [player, updatePlayerPos, resetPlayer, playerRotate, nextPiece];
 };

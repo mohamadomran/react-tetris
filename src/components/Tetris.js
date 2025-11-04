@@ -22,6 +22,8 @@ import StartButton from "./StartButton";
 const Tetris = () => {
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [savedDropTime, setSavedDropTime] = useState(null);
 
   const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
@@ -42,9 +44,25 @@ const Tetris = () => {
     setDropTime(1000);
     resetPlayer();
     setGameOver(false);
+    setPaused(false);
     setScore(0);
     setRows(0);
     setLevel(0);
+  };
+
+  const togglePause = () => {
+    if (gameOver || dropTime === null) return; // Can't pause if game hasn't started or is over
+
+    if (!paused) {
+      // Pausing: save current drop time and stop the game
+      setSavedDropTime(dropTime);
+      setDropTime(null);
+      setPaused(true);
+    } else {
+      // Unpausing: restore the drop time
+      setDropTime(savedDropTime);
+      setPaused(false);
+    }
   };
 
   const drop = () => {
@@ -69,7 +87,7 @@ const Tetris = () => {
   };
 
   const keyUp = ({ keyCode }) => {
-    if (!gameOver) {
+    if (!gameOver && !paused) {
       if (keyCode === 40) {
         setDropTime(1000 / (level + 1) + 200);
       }
@@ -82,7 +100,14 @@ const Tetris = () => {
   };
 
   const move = ({ keyCode }) => {
-    if (!gameOver) {
+    // Handle pause key (P or Escape) separately
+    if (keyCode === 80 || keyCode === 27) {
+      togglePause();
+      return;
+    }
+
+    // Prevent all movements when game is over or paused
+    if (!gameOver && !paused) {
       if (keyCode === 37) movePlayer(-1);
       else if (keyCode === 39) movePlayer(1);
       else if (keyCode === 40) dropPlayer();
@@ -108,6 +133,7 @@ const Tetris = () => {
             <Display gameOver={gameOver} text="Game Over" />
           ) : (
             <div>
+              {paused && <Display text="PAUSED" />}
               <Display text={`Score: ${score}`} />
               <Display text={`Rows: ${rows}`} />
               <Display text={`Level: ${level}`} />
